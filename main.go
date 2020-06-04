@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const version = "1.0.0"
+const version = "1.1.0"
 
 func help() {
 	fmt.Printf(`********----------syncd外挂使用说明----------*********
