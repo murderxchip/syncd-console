@@ -9,7 +9,7 @@ import (
 
 const (
 	configFileName = "syncd-console.ini"
-	defaultUrl     = ""
+	defaultUrl     = "http://your-syncd-host/entry"
 )
 
 type AccessConfig struct {
@@ -74,14 +74,10 @@ func (c *SyncdConfig) Save() {
 func ReadUserConfig() AccessConfig {
 	var deployUrl, schema, host, username, password string
 input_host:
-	fmt.Printf("请输入部署主机地址（回车默认:%s）:", defaultUrl)
+	fmt.Printf("请输入部署主机地址（例子:%s）:", defaultUrl)
 	if _, err := fmt.Scanln(&deployUrl); err != nil {
 		deployUrl = defaultUrl
 	}
-
-	//if z.Trim(deployUrl) == "" {
-	//	deployUrl = defaultUrl
-	//}
 
 	u, err := url.Parse(deployUrl)
 	if err != nil || u.Scheme == "" || u.Host == "" {
