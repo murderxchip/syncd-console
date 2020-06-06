@@ -5,11 +5,8 @@
 ![view](./resources/images/view.png)
 
 
-## Install
+## use
 ````
-git clone https://github.com/murderxchip/syncd-console.git
-cd syncd-console
-make
 ./bin/scd
 ````
 
