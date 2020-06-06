@@ -1,7 +1,25 @@
 ##Syncd-console（syncd命令行插件）
-使用步骤:
 
-1.可执行程序当前目录配置 syncd-console.ini 
+## Preview
+![login](./resources/images/login.png)
+![view](./resources/images/view.png)
+
+
+## Install
+````
+git clone https://github.com/murderxchip/syncd-console.git
+cd syncd-console
+make
+./bin/scd
+````
+
+## add ~/bin to your environment PATH:
+````
+export PATH=YOURPATH:$PATH
+````
+
+## Configuration 
+* vim ~/.syncd-console.ini 
 (可不配置，第一次运行程序按向导提示将自动完成)
 ```
 schema = http
@@ -9,25 +27,26 @@ host = <<your syncd host>>
 username = <<username>>
 password = <<password>>
 ```
-2.登录Syncd
+
+## deploy project
 ```
-./syncd-console login
+d projectName comment tag 
+eg:d test-project testDeploy develop
 ```
 
-3.查看可发布任务列表(用于部署中的project-name)
+## Usage
 ```
-./syncd-console projects
+./bin/scd -h
+
+d(deploy) - 发布项目(d projectName comment tag) eg:d test-project testDeploy develop
+? - 显示当前帮助
+l(login) - 登录
+t(task) - 查看部署任务列表
+h(history) - 查看近期发布详情
 ```
 
-4.查看当前已提交任务列表
+## Author: 
 ```
-./syncd-console tasks
+7853151@qq.com 
+xu_jw@foxmail.com
 ```
-
-5.一键部署
-```
-./syncd-console submit -p <<project-name>> -m "描述"
-./syncd-console submit -p <<project-name>> -m "描述" -t "tag"
-```
-
-Author: 7853151@qq.com

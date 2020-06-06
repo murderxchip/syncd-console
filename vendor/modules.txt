@@ -1,0 +1,31 @@
+# github.com/astaxie/beego v1.12.1
+## explicit
+github.com/astaxie/beego/config
+# github.com/bitly/go-simplejson v0.5.0
+## explicit
+github.com/bitly/go-simplejson
+# github.com/howeyc/gopass v0.0.0-20190910152052-7cb4b85ec19c
+## explicit
+github.com/howeyc/gopass
+# github.com/murderxchip/cmap v0.0.0-20190920131447-e268647063f5
+## explicit
+github.com/murderxchip/cmap
+# github.com/nutzam/zgo v0.0.0-20181226065031-4e565d7cf604
+## explicit
+github.com/nutzam/zgo
+# github.com/parnurzeal/gorequest v0.2.16
+## explicit
+github.com/parnurzeal/gorequest
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
+# golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+golang.org/x/crypto/ssh/terminal
+# golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+golang.org/x/net/publicsuffix
+# golang.org/x/sys v0.0.0-20190412213103-97732733099d
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# moul.io/http2curl v1.0.0
+## explicit
+moul.io/http2curl

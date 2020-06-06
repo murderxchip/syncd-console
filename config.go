@@ -3,13 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/astaxie/beego/config"
+	"github.com/howeyc/gopass"
 	z "github.com/nutzam/zgo"
+	"github.com/pkg/errors"
 	"net/url"
-)
-
-const (
-	configFileName = "syncd-console.ini"
-	defaultUrl     = ""
 )
 
 type AccessConfig struct {
@@ -34,9 +31,46 @@ func InitConfig() AccessConfig {
 	return syncdCfg.access
 }
 
+func LoadFileInfo() (AccessConfig,error)  {
+	err := syncdCfg.LoadFile()
+
+	return syncdCfg.access,err
+}
+
+func (c *AccessConfig) InputFile()  {
+	configStr := fmt.Sprintf("schema = %s\nhost = %s\nusername = %s\npassword = %s\n", c.Schema, c.Host, c.Username, c.Password)
+	cfg, err := config.NewConfigData("ini", []byte(configStr))
+	if err != nil {
+		panic("初始化配置失败：" + err.Error())
+	}
+	if err = cfg.SaveConfigFile(ConfigFileName); err != nil {
+		panic("写入配置文件失败：" + err.Error())
+	} else {
+		println("写入配置成功！请按帮助说明进行操作。")
+	}
+	return
+}
+
+func (c *SyncdConfig)LoadFile() error {
+	cfg, err := config.NewConfig("ini", ConfigFileName)
+	if err != nil {
+		return errors.New("配置文件错误")
+	}
+	syncdCfg.cfg = cfg
+
+	syncdCfg.access.Schema = z.Trim(cfg.String("schema"))
+	syncdCfg.access.Host = z.Trim(cfg.String("host"))
+	syncdCfg.access.Username = z.Trim(cfg.String("username"))
+	syncdCfg.access.Password = z.Trim(cfg.String("password"))
+	if z.IsBlank(syncdCfg.access.Username) || z.IsBlank(syncdCfg.access.Host) || z.IsBlank(syncdCfg.access.Username) || z.IsBlank(syncdCfg.access.Password) {
+		return errors.New("请先设置配置文件 syncd-console.ini 的参数")
+	}
+	return nil
+}
+
 func (c *SyncdConfig) Load() {
 begin_load:
-	cfg, err := config.NewConfig("ini", configFileName)
+	cfg, err := config.NewConfig("ini", ConfigFileName)
 	if err != nil {
 		//panic("配置文件加载失败")
 		//init config
@@ -49,7 +83,7 @@ begin_load:
 			panic("初始化配置失败：" + err.Error())
 		}
 
-		if err = cfg.SaveConfigFile(configFileName); err != nil {
+		if err = cfg.SaveConfigFile(ConfigFileName); err != nil {
 			panic("写入配置文件失败：" + err.Error())
 		} else {
 			println("写入配置成功！请按帮助说明进行操作。")
@@ -74,14 +108,10 @@ func (c *SyncdConfig) Save() {
 func ReadUserConfig() AccessConfig {
 	var deployUrl, schema, host, username, password string
 input_host:
-	fmt.Printf("请输入部署主机地址（回车默认:%s）:", defaultUrl)
+	fmt.Printf("请输入部署主机地址（例子:%s）:", DefaultUrl)
 	if _, err := fmt.Scanln(&deployUrl); err != nil {
-		deployUrl = defaultUrl
+		deployUrl = DefaultUrl
 	}
-
-	//if z.Trim(deployUrl) == "" {
-	//	deployUrl = defaultUrl
-	//}
 
 	u, err := url.Parse(deployUrl)
 	if err != nil || u.Scheme == "" || u.Host == "" {
@@ -100,7 +130,10 @@ input_username:
 
 input_password:
 	fmt.Print("请输入登录密码:")
-	if _, err := fmt.Scanln(&password); err != nil || z.Trim(password) == "" {
+	passwordByte, err := gopass.GetPasswdMasked()
+	password = string(passwordByte)
+
+	if err != nil || z.Trim(password) == "" {
 		goto input_password
 	}
 
