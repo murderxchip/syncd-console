@@ -6,10 +6,6 @@ import (
 	"os"
 )
 
-const (
-	tokenFile = ".syncd-token"
-)
-
 var _token string
 
 func TokenFail() {
@@ -18,14 +14,14 @@ func TokenFail() {
 }
 
 func RemoveToken() {
-	if err := os.Remove(tokenFile); err != nil {
+	if err := os.Remove(TokenFile); err != nil {
 		logger.Println("remove .token failed")
 	}
 }
 
 func SetToken(token string) {
 	//logger.Println("set token:", token)
-	err := ioutil.WriteFile(tokenFile, []byte(token), 0644)
+	err := ioutil.WriteFile(TokenFile, []byte(token), 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +30,7 @@ func SetToken(token string) {
 
 func GetToken() string {
 	if _token == "" {
-		tokenByte, err := ioutil.ReadFile(tokenFile)
+		tokenByte, err := ioutil.ReadFile(TokenFile)
 		if err != nil {
 			panic("请先登录")
 			//NewRequest(syncdCfg.access).Login()

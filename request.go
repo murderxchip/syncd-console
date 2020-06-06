@@ -12,6 +12,39 @@ import (
 	"time"
 )
 
+type SpaceListResponse struct {
+	Code    int       `json:"code"`
+	Data    SpaceData `json:"data"`
+	Message string    `json:"message"`
+}
+type SpaceList struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Ctime       int    `json:"ctime"`
+}
+type SpaceData struct {
+	List  []SpaceList `json:"list"`
+	Total int         `json:"total"`
+}
+
+//ProjectsList
+type ProjectsListResponse struct {
+	Code    int              `json:"code"`
+	Data    ProjectsListData `json:"data"`
+	Message string           `json:"message"`
+}
+type ProjectsLis struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	NeedAudit int    `json:"need_audit"`
+	Status    int    `json:"status"`
+}
+type ProjectsListData struct {
+	List  []ProjectsLis `json:"list"`
+	Total int           `json:"total"`
+}
+
 const agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0"
 
 const (
@@ -141,7 +174,7 @@ func ParseResponse(respBody string) (RespData, error) {
 	return response.Data, nil
 }
 
-func (req *Request) Login() {
+func (req *Request) Login() error {
 	form := &LoginForm{req.config.Username, Md5(req.config.Password)}
 	params := *cmap.NewCMap()
 	url := req.getUrl("api/login", params)
@@ -166,8 +199,10 @@ func (req *Request) Login() {
 		})
 
 	if errs != nil {
-		panic("登录失败，请设置正确的用户名和密码。")
+		return errors.New("登录失败")
 	}
+	fmt.Println("登录成功")
+	return nil
 }
 
 func (req *Request) AuthCookie() *http.Cookie {
@@ -179,8 +214,9 @@ func (req *Request) AuthCookie() *http.Cookie {
 }
 
 /**
-/api/deploy/apply/project/all?_t=1568861966520
-*/
+ *获取所有的项目列表
+ * /api/deploy/apply/project/all?_t=1568861966520
+ */
 func (req *Request) Projects() (projectsJson string) {
 	params := *cmap.NewCMap()
 	url := req.getUrl("api/deploy/apply/project/all", params)
@@ -411,4 +447,126 @@ func (req *Request) DeployStatus(id int) int {
 	}
 
 	return int(data["status"].(float64))
+}
+
+/**
+  api/project/space/list?
+  获取用户列表
+*/
+func (req *Request) SpaceList() SpaceListResponse {
+	params := *cmap.NewCMap()
+	_ = params.Set("offset", strconv.Itoa(0))
+	_ = params.Set("limit", strconv.Itoa(999))
+
+	url := req.getUrl("api/project/space/list", params)
+	_, body, errs := gorequest.New().
+		Get(url).
+		AppendHeader("Accept", "application/json").
+		AppendHeader("Host", req.config.Host).
+		AppendHeader("User-Agent", agent).
+		AddCookie(req.AuthCookie()).
+		End(func(response gorequest.Response, body string, errs []error) {
+			if response.StatusCode != 200 {
+				panic(fmt.Sprintf("%s", errs))
+			}
+		})
+
+	if errs != nil {
+		panic(errs)
+	}
+
+	respData := SpaceListResponse{}
+	err := json.Unmarshal([]byte(body), &respData)
+	if err != nil {
+		panic("parse Unmarshal failed")
+	}
+
+	if respData.Code == 1005 {
+		TokenFail()
+	}
+
+	//projectsByte, err := json.Marshal(respData)
+	return respData
+}
+
+/**
+ ** api/project/list
+ */
+func (req *Request) ProjectsList(spaceId int) ProjectsListResponse {
+	params := *cmap.NewCMap()
+	_ = params.Set("offset", strconv.Itoa(0))
+	_ = params.Set("limit", strconv.Itoa(999))
+	_ = params.Set("space_id", strconv.Itoa(spaceId))
+
+	url := req.getUrl("api/project/list", params)
+	_, body, errs := gorequest.New().
+		Get(url).
+		AppendHeader("Accept", "application/json").
+		AppendHeader("Host", req.config.Host).
+		AppendHeader("User-Agent", agent).
+		AddCookie(req.AuthCookie()).
+		End(func(response gorequest.Response, body string, errs []error) {
+			if response.StatusCode != 200 {
+				panic(fmt.Sprintf("%s", errs))
+			}
+		})
+
+	if errs != nil {
+		panic(errs)
+	}
+
+	respData := ProjectsListResponse{}
+	err := json.Unmarshal([]byte(body), &respData)
+	if err != nil {
+		panic("parse Unmarshal failed")
+	}
+	if respData.Code == 1005 {
+		TokenFail()
+	}
+
+	//projectsByte, err := json.Marshal(respData)
+	return respData
+}
+
+func (req *Request) SubmitById(projectId string, spaceId string, name string, branchName string) error {
+	if projectId == "" || spaceId == "" {
+		panic("name 不能都为空")
+	}
+
+	description := name
+
+	params := *cmap.NewCMap()
+	_ = params.Set("project_id", projectId)
+	_ = params.Set("space_id", spaceId)
+	_ = params.Set("name", name)
+	_ = params.Set("description", description)
+	if branchName != "" {
+		_ = params.Set("branch_name", branchName)
+	}
+
+	//fmt.Printf("%v", params)
+	url := req.getUrl("api/deploy/apply/submit", params)
+	_, body, errs := gorequest.New().
+		Post(url).
+		Type("form").
+		AppendHeader("Accept", "application/json").
+		AppendHeader("Host", req.config.Host).
+		AppendHeader("User-Agent", agent).
+		AddCookie(req.AuthCookie()).
+		End(func(response gorequest.Response, body string, errs []error) {
+			if response.StatusCode != 200 {
+				panic(fmt.Sprintf("%s", errs))
+			}
+		})
+
+	if errs != nil {
+		panic(errs)
+	}
+
+	_, err := ParseResponse(body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

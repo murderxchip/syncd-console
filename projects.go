@@ -1,6 +1,9 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 type ProjectInfo struct {
 	ProjectId   int    `json:"project_id"`
@@ -29,4 +32,17 @@ func (p *Projects) GetProject(name string) *ProjectInfo {
 		}
 	}
 	return nil
+}
+
+//模糊查询项目名称
+func (p *Projects) GetProjectByFuzzy(projectName string) (*Projects, int) {
+	projects := &Projects{}
+
+	for _, v := range p.data {
+		if strings.Contains(v.ProjectName, projectName) {
+			projects.data = append(projects.data, v)
+		}
+	}
+
+	return projects, len(projects.data)
 }

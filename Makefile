@@ -1,5 +1,4 @@
-
-TARGET=bin/sd
+TARGET=bin/sdc
 
 build:
 	@echo "building source..."
