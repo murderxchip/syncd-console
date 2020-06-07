@@ -1,8 +1,9 @@
 ##Syncd-console（syncd命令行插件）
 
 ## Preview
-![login](./resources/images/login.jpg)
-![view](./resources/images/view.jpg)
+
+![login](./resources/images/login.png)
+![view](./resources/images/view.png)
 
 
 ## Install
